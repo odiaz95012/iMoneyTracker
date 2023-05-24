@@ -1,0 +1,2 @@
+export const WEB_CLIENT_ID = '883430361622-ek632ac43b2ocgjsiof9dmjh93svh5c3.apps.googleusercontent.com';
+export const IOS_CLIENT_ID = '883430361622-qgh5r2r067m9s39mdel7opdv4ilr1og1.apps.googleusercontent.com';
