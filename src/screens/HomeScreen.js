@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {useEffect, useState} from 'react';
 import {
   StyleSheet,
   View,
@@ -6,52 +6,191 @@ import {
   Dimensions,
   TouchableOpacity,
   Text,
+  ScrollView,
 } from 'react-native';
 import {LineChart} from 'react-native-chart-kit';
 import {Svg, Rect, Text as TextSVG} from 'react-native-svg';
-import {useState} from 'react';
 
 const HomeScreen = () => {
-  let [tooltipPos, setTooltipPos] = useState({
+  const [tooltipPos, setTooltipPos] = useState({
     x: 0,
     y: 0,
     visible: false,
     value: 0,
   });
-
-  const line = {
+  const dailyChart = {
+    labels: ['6 AM', '12 PM', '6 PM', '12 AM'],
+    datasets: [
+      {
+        data: [15, 25, 32, 68],
+        strokeWidth: 2,
+      },
+    ],
+  };
+  const weeklyChart = {
     labels: ['Mon', 'Tues', 'Wed', 'Thur', 'Fri', 'Sat', 'Sun'],
     datasets: [
       {
         data: [20, 45, 28, 80, 99, 43, 69],
-        strokeWidth: 2, // optional,
+        strokeWidth: 2,
       },
     ],
   };
-  const weeklyChartConfig = {
+  const monthlyChart = {
+    labels: [
+      'Jan',
+      'Feb',
+      'Mar',
+      'Apr',
+      'May',
+      'Jun',
+      'Jul',
+      'Aug',
+      'Sep',
+      'Oct',
+      'Nov',
+      'Dec',
+    ],
+    datasets: [
+      {
+        data: [20, 45, 28, 80, 99, 43, 69, 85, 69, 32, 98, 35],
+        strokeWidth: 2,
+      },
+    ],
+  };
+  const chartConfig = {
     backgroundGradientFrom: '#373737',
     backgroundGradientTo: '#564C4D',
-    decimalPlaces: 2, // optional, defaults to 2dp
+    decimalPlaces: 2,
     color: (opacity = 1) => `rgba(26, 255, 146, ${opacity})`,
   };
 
+  const [selectedChart, setSelectedChart] = useState(dailyChart);
+  const [dailyBtnColor, setDailyBtnColor] = useState('#257AFD');
+  const [weeklyBtnColor, setWeeklyBtnColor] = useState('#31c48d');
+  const [monthlyBtnColor, setMonthlyBtnColor] = useState('#31c48d');
+
+  const handleChartChange = chart => {
+    setSelectedChart(chart);
+    adjustBtnColors(chart);
+  };
+
+  function adjustBtnColors(chart) {
+    if (chart === dailyChart) {
+      setDailyBtnColor('#257AFD');
+      setWeeklyBtnColor('#31c48d');
+      setMonthlyBtnColor('#31c48d');
+    } else if (chart === weeklyChart) {
+      setDailyBtnColor('#31c48d');
+      setWeeklyBtnColor('#257AFD');
+      setMonthlyBtnColor('#31c48d');
+    } else if (chart === monthlyChart) {
+      setDailyBtnColor('#31c48d');
+      setWeeklyBtnColor('#31c48d');
+      setMonthlyBtnColor('#257AFD');
+    }
+  }
+
+  const styles = StyleSheet.create({
+    mainView: {
+      flex: 1,
+      flexDirection: 'column',
+      justifyContent: 'center',
+      alignItems: 'center',
+      backgroundColor: '#5c635e',
+    },
+    logoContainer: {
+      right: '43%',
+      position: 'relative',
+      top: '55%'
+    },
+    logoStyle: {
+      width: 50,
+      height: 50,
+      borderRadius: 50 / 2,
+    },
+    chartContainer: {
+      top: '5%',
+    },
+    viewSelectorContainer: {
+      flexDirection: 'row',
+      width: Dimensions.get('window').width - 75,
+      height: 25,
+      alignItems: 'center',
+      justifyContent: 'center',
+      borderRadius: 25,
+      backgroundColor: '#373737',
+      left: '15%',
+      marginTop: 5,
+      position: 'relative',
+    },
+    viewSelectorBtnContainer: {
+      marginRight: 10,
+    },
+    detailsContainer: {
+      width: Dimensions.get('window').width - 20,
+      height: 500,
+      borderRadius: 15,
+      backgroundColor: '#fff',
+      position: 'relative',
+      top: '10%',
+    },
+    addExpenseBtnContainer: {
+      width: 75,
+      height: 75,
+      borderRadius: 75/2,
+      backgroundColor: '#000',
+      alignItems: 'center',
+      justifyContent: 'center',
+      right:15,
+      zIndex: 15,
+      bottom: 5,
+      position: 'absolute',
+    },
+    addExpenseBtn: {
+      color: '#fff',
+    },
+    addExpenseBtnText: {
+      color: '#31c48d',
+      fontSize: 55,
+      fontFamily: 'ArialRoundedMTBold'
+    },
+    titleContainer: {
+      alignItems: 'center',
+      justifyContent: 'center',
+      top: 5,
+      left: 5
+    },
+    titleText: {
+      color: '#31c48d',
+      fontSize: 24,
+      fontWeight:'bold',
+      left: 15,
+      paddingTop: 5,
+      fontFamily: 'ArialRoundedMTBold'
+    },
+  });
+
   return (
-    <View style={styles.mainView}>
-      <View style={styles.logoContainer}>
-        <Image
-          source={require('../assets/logo.png')}
-          style={styles.logoStyle}
-        />
+    <ScrollView contentContainerStyle={styles.mainView}>
+      <View style={styles.titleContainer}>
+        <View style={styles.logoContainer}>
+          <Image
+            source={require('../assets/logo.png')}
+            style={styles.logoStyle}
+          />
+        </View>
+        <Text style={styles.titleText}>Welcome to iMoneyClicker</Text>
       </View>
       <View style={styles.chartContainer}>
         <LineChart
-          data={line}
-          width={Dimensions.get('window').width - 10} // from react-native
+          data={selectedChart}
+          width={Dimensions.get('window').width - 10}
           height={220}
           yAxisLabel={'$'}
           withInnerLines={0}
           withOuterLines={0}
-          chartConfig={weeklyChartConfig}
+          chartConfig={chartConfig}
           bezier
           style={{
             borderRadius: 25,
@@ -102,61 +241,30 @@ const HomeScreen = () => {
         />
         <View style={styles.viewSelectorContainer}>
           <View style={styles.viewSelectorBtnContainer}>
-            <TouchableOpacity>
-              <Text style={styles.viewSelectorBtnStyles}>Weekly</Text>
+            <TouchableOpacity onPress={() => handleChartChange(dailyChart)}>
+              <Text style={{color: dailyBtnColor, fontFamily: 'ArialRoundedMTBold'}}>Daily</Text>
             </TouchableOpacity>
           </View>
           <View style={styles.viewSelectorBtnContainer}>
-            <TouchableOpacity>
-              <Text style={styles.viewSelectorBtnStyles}>Monthly</Text>
+            <TouchableOpacity onPress={() => handleChartChange(weeklyChart)}>
+              <Text style={{color: weeklyBtnColor, fontFamily: 'ArialRoundedMTBold'}}>Weekly</Text>
             </TouchableOpacity>
           </View>
           <View style={styles.viewSelectorBtnContainer}>
-            <TouchableOpacity>
-              <Text style={styles.viewSelectorBtnStyles}>Yearly</Text>
+            <TouchableOpacity onPress={() => handleChartChange(monthlyChart)}>
+              <Text style={{color: monthlyBtnColor, fontFamily: 'ArialRoundedMTBold'}}>Monthly</Text>
             </TouchableOpacity>
           </View>
         </View>
       </View>
-    </View>
+      <View style={styles.detailsContainer}></View>
+      <View style={styles.addExpenseBtnContainer}>
+        <TouchableOpacity style={styles.addExpenseBtn}>
+          <Text style={styles.addExpenseBtnText}>+</Text>
+        </TouchableOpacity>
+      </View>
+    </ScrollView>
   );
 };
-const styles = StyleSheet.create({
-  mainView: {
-    flex: 1,
-    flexDirection: 'column',
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: '#5c635e',
-  },
-  logoContainer: {
-    bottom: '45%',
-    right: '40%',
-  },
-  logoStyle: {
-    width: 50,
-    height: 50,
-    borderRadius: 50 / 2,
-  },
-  chartContainer: {
-    bottom: '30%',
-  },
-  viewSelectorContainer: {
-    flexDirection: 'row',
-    width: Dimensions.get('window').width - 75,
-    height: 25,
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderRadius:25,
-    backgroundColor: '#373737',
-    left:'15%',
-    marginTop: 5
-  },
-  viewSelectorBtnStyles: {
-    color: '#31c48d',
-  },
-  viewSelectorBtnContainer: {
-    marginRight: 10,
-  },
-});
+
 export default HomeScreen;
