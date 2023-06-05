@@ -9,6 +9,7 @@ import {
   GoogleSignin,
   statusCodes
 } from '@react-native-google-signin/google-signin';
+import { async } from '@firebase/util';
 
 const SignIn = ({navigation}) =>{
 
@@ -26,26 +27,24 @@ const SignIn = ({navigation}) =>{
   function navigateHomePage(){
     navigation.navigate('homePage');
   }
-  async function logIn(){
-    try{
-      const docRef = doc(database, 'users', email);
-      const docSnap = await getDoc(docRef);
-      if(!docSnap.exists()){
-        Alert.alert('There is no user registered with the inputted email.');
-        return;
-      }
-      if(docSnap.data().pass_word == password){
-        navigateHomePage();
-      }else if(docSnap.data().pass_word != password){
-        Alert.alert('Password was incorrect. Please try again');
+ async function logIn(){
+    return new Promise(async (resolve, reject) => {
 
-      }
-      else{
-        console.log('The user does not exist in the database.');
-      }
-    }catch(e){
-      console.log('Error logging in: ', e);
-    }
+            const docRef = doc(database, 'users', email);
+            const docSnap = await getDoc(docRef);
+            if(!docSnap.exists()){
+              reject(console.log('There is no user registered with the inputted email.'));
+            }
+            if(docSnap.data().pass_word == password){
+              resolve(navigateHomePage());
+            }else if(docSnap.data().pass_word != password){
+              reject(console.log('Password was incorrect. Please try again'));
+            }
+            else{
+              reject(console.log('The user does not exist in the database.'));
+            }
+          })
+  
   }
   function configureGoogleSign() {
     GoogleSignin.configure({
@@ -70,16 +69,16 @@ const SignIn = ({navigation}) =>{
     } catch (error) {
       if (error.code === statusCodes.SIGN_IN_CANCELLED) {
         // when user cancels sign in process,
-        Alert.alert('Process Cancelled')
+        console.log('Process Cancelled')
       } else if (error.code === statusCodes.IN_PROGRESS) {
         // when in progress already
-        Alert.alert('Process in progress')
+        console.log('Process in progress')
       } else if (error.code === statusCodes.PLAY_SERVICES_NOT_AVAILABLE) {
         // when play services not available
-        Alert.alert('Play services are not available')
+        console.log('Play services are not available')
       } else {
         // some other error
-        Alert.alert('Something else went wrong... ', error.toString())
+        console.log('Something else went wrong... ', error.toString())
         setError(error)
       }
     }
@@ -91,10 +90,10 @@ const SignIn = ({navigation}) =>{
       } catch (error) {
         if (error.code === statusCodes.SIGN_IN_REQUIRED) {
           // when user hasn't signed in yet
-          Alert.alert('Please Sign in')
+          console.log('Please Sign in')
           setIsLoggedIn(false)
         } else {
-          Alert.alert('Something else went wrong... ', error.toString())
+          console.log('Something else went wrong... ', error.toString())
           setIsLoggedIn(false)
         }
       }
@@ -142,7 +141,16 @@ const SignIn = ({navigation}) =>{
               />
           </View>
             <View style={styles.loginBtn}>
-                  <TouchableOpacity onPress={() => logIn()}>
+                  <TouchableOpacity onPress={() => 
+                    logIn()
+                      .then(() => {
+                        Alert.alert("Welcome to iMoneyClicker!");
+                    })
+                      .catch(() => {
+                        Alert.alert("There was an error logging you in. Please try again.")
+                      })
+
+                    }>
                     <Text style={styles.logInBtnText}>Login</Text>
                   </TouchableOpacity>
             </View>

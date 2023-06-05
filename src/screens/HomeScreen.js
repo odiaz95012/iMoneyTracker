@@ -10,6 +10,8 @@ import {
 } from 'react-native';
 import {LineChart} from 'react-native-chart-kit';
 import {Svg, Rect, Text as TextSVG} from 'react-native-svg';
+import {FontAwesomeIcon} from '@fortawesome/react-native-fontawesome';
+import {faUser} from '@fortawesome/free-solid-svg-icons';
 
 const HomeScreen = () => {
   const [tooltipPos, setTooltipPos] = useState({
@@ -98,16 +100,16 @@ const HomeScreen = () => {
       justifyContent: 'center',
       alignItems: 'center',
       backgroundColor: '#5c635e',
+      overflow: 'hidden'
     },
     logoContainer: {
-      right: '43%',
       position: 'relative',
-      top: '55%'
+      paddingRight: 35,
     },
     logoStyle: {
-      width: 50,
-      height: 50,
-      borderRadius: 50 / 2,
+      width: 45,
+      height: 45,
+      borderRadius: 45 / 2,
     },
     chartContainer: {
       top: '5%',
@@ -138,11 +140,11 @@ const HomeScreen = () => {
     addExpenseBtnContainer: {
       width: 75,
       height: 75,
-      borderRadius: 75/2,
+      borderRadius: 75 / 2,
       backgroundColor: '#000',
       alignItems: 'center',
       justifyContent: 'center',
-      right:15,
+      right: 15,
       zIndex: 15,
       bottom: 5,
       position: 'absolute',
@@ -153,21 +155,44 @@ const HomeScreen = () => {
     addExpenseBtnText: {
       color: '#31c48d',
       fontSize: 55,
-      fontFamily: 'ArialRoundedMTBold'
+      fontFamily: 'ArialRoundedMTBold',
     },
     titleContainer: {
       alignItems: 'center',
       justifyContent: 'center',
-      top: 5,
-      left: 5
+      flexDirection: 'row',
+      marginTop: '10%',
+      backgroundColor: '#5c635e',
+      opacity: 0.65,
+      width: Dimensions.get('window').width + 20,
+      height: 60,
+      borderStyle: 'solid',
+      borderWidth: 1,
+      borderTopColor: '#5c635e',
+      borderBottomColor: 'rgba(49, 196, 141, 0.55)'
+    },
+    titleTextContainer: {
+      position: 'relative',
+      paddingRight: 15,
     },
     titleText: {
       color: '#31c48d',
-      fontSize: 24,
-      fontWeight:'bold',
-      left: 15,
-      paddingTop: 5,
-      fontFamily: 'ArialRoundedMTBold'
+      fontSize: 18,
+      fontWeight: 'bold',
+      fontFamily: 'ArialRoundedMTBold',
+      right: 5,
+    },
+    profileBttn: {
+      width: 45,
+      height: 45,
+      backgroundColor: '#31c48d',
+      alignItems: 'center',
+      justifyContent: 'center',
+      borderRadius: 45 / 2,
+      position: 'relative',
+      borderStyle: 'solid',
+      borderWidth: 1,
+      borderColor: '#fff'
     },
   });
 
@@ -180,7 +205,14 @@ const HomeScreen = () => {
             style={styles.logoStyle}
           />
         </View>
-        <Text style={styles.titleText}>Welcome to iMoneyClicker</Text>
+        <View style={styles.titleTextContainer}>
+          <Text style={styles.titleText}>Welcome to iMoneyClicker</Text>
+        </View>
+        <View style={styles.profileBttn}>
+          <TouchableOpacity>
+            <FontAwesomeIcon icon={faUser} style={{color: '#fff'}} />
+          </TouchableOpacity>
+        </View>
       </View>
       <View style={styles.chartContainer}>
         <LineChart
@@ -242,17 +274,35 @@ const HomeScreen = () => {
         <View style={styles.viewSelectorContainer}>
           <View style={styles.viewSelectorBtnContainer}>
             <TouchableOpacity onPress={() => handleChartChange(dailyChart)}>
-              <Text style={{color: dailyBtnColor, fontFamily: 'ArialRoundedMTBold'}}>Daily</Text>
+              <Text
+                style={{
+                  color: dailyBtnColor,
+                  fontFamily: 'ArialRoundedMTBold',
+                }}>
+                Daily
+              </Text>
             </TouchableOpacity>
           </View>
           <View style={styles.viewSelectorBtnContainer}>
             <TouchableOpacity onPress={() => handleChartChange(weeklyChart)}>
-              <Text style={{color: weeklyBtnColor, fontFamily: 'ArialRoundedMTBold'}}>Weekly</Text>
+              <Text
+                style={{
+                  color: weeklyBtnColor,
+                  fontFamily: 'ArialRoundedMTBold',
+                }}>
+                Weekly
+              </Text>
             </TouchableOpacity>
           </View>
           <View style={styles.viewSelectorBtnContainer}>
             <TouchableOpacity onPress={() => handleChartChange(monthlyChart)}>
-              <Text style={{color: monthlyBtnColor, fontFamily: 'ArialRoundedMTBold'}}>Monthly</Text>
+              <Text
+                style={{
+                  color: monthlyBtnColor,
+                  fontFamily: 'ArialRoundedMTBold',
+                }}>
+                Monthly
+              </Text>
             </TouchableOpacity>
           </View>
         </View>
