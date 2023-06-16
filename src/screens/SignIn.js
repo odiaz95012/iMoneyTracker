@@ -1,7 +1,7 @@
 import React from 'react';
 import {Text, Button , StyleSheet, View, Image, TextInput, TouchableOpacity, Alert} from 'react-native';
 import { useState, useEffect } from 'react';
-import { database } from '../../index';
+import { database, auth } from '../../index';
 import { collection, doc, getDoc } from 'firebase/firestore';
 import { WEB_CLIENT_ID, IOS_CLIENT_ID} from '../utils/keys';
 import {
@@ -10,6 +10,7 @@ import {
   statusCodes
 } from '@react-native-google-signin/google-signin';
 import { async } from '@firebase/util';
+import { signInWithEmailAndPassword } from 'firebase/auth';
 
 const SignIn = ({navigation}) =>{
 
@@ -17,6 +18,7 @@ const SignIn = ({navigation}) =>{
   const [isLoggedIn, setIsLoggedIn] = useState(false)
   const [userInfo, setUserInfo] = useState(null)
   const [error, setError] = useState(null)
+  const [user, setUser] = useState(null)
 
   function navigateSignUp(){
     navigation.navigate('signUp');
@@ -27,25 +29,21 @@ const SignIn = ({navigation}) =>{
   function navigateHomePage(){
     navigation.navigate('homePage');
   }
- async function logIn(){
-    return new Promise(async (resolve, reject) => {
-
-            const docRef = doc(database, 'users', email);
-            const docSnap = await getDoc(docRef);
-            if(!docSnap.exists()){
-              reject(console.log('There is no user registered with the inputted email.'));
-            }
-            if(docSnap.data().pass_word == password){
-              resolve(navigateHomePage());
-            }else if(docSnap.data().pass_word != password){
-              reject(console.log('Password was incorrect. Please try again'));
-            }
-            else{
-              reject(console.log('The user does not exist in the database.'));
-            }
-          })
-  
+  function signInUser(){
+    signInWithEmailAndPassword(auth, email, password)
+      .then((userCredential) => {
+        setUser(userCredential.user)
+        setIsLoggedIn(true);
+        setError(null);
+        console.log(userCredential.user)
+        navigateHomePage();
+      })
+      .catch((error) => {
+        setError(error)
+        console.log("Error: " + error);
+      })
   }
+
   function configureGoogleSign() {
     GoogleSignin.configure({
       webClientId: WEB_CLIENT_ID,
@@ -142,14 +140,7 @@ const SignIn = ({navigation}) =>{
           </View>
             <View style={styles.loginBtn}>
                   <TouchableOpacity onPress={() => 
-                    logIn()
-                      .then(() => {
-                        Alert.alert("Welcome to iMoneyClicker!");
-                    })
-                      .catch(() => {
-                        Alert.alert("There was an error logging you in. Please try again.")
-                      })
-
+                    signInUser()
                     }>
                     <Text style={styles.logInBtnText}>Login</Text>
                   </TouchableOpacity>

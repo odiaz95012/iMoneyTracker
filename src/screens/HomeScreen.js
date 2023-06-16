@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from 'react';
+import React, {useState} from 'react';
 import {
   StyleSheet,
   View,
@@ -13,7 +13,7 @@ import {Svg, Rect, Text as TextSVG} from 'react-native-svg';
 import {FontAwesomeIcon} from '@fortawesome/react-native-fontawesome';
 import {faUser} from '@fortawesome/free-solid-svg-icons';
 
-const HomeScreen = () => {
+const HomeScreen = ({navigation}) => {
   const [tooltipPos, setTooltipPos] = useState({
     x: 0,
     y: 0,
@@ -92,6 +92,9 @@ const HomeScreen = () => {
       setMonthlyBtnColor('#257AFD');
     }
   }
+  function navigateExpensePage(){
+    navigation.navigate("addExpensePage");
+  }
 
   const styles = StyleSheet.create({
     mainView: {
@@ -163,7 +166,7 @@ const HomeScreen = () => {
       flexDirection: 'row',
       marginTop: '10%',
       backgroundColor: '#5c635e',
-      opacity: 0.65,
+      opacity: 0.75,
       width: Dimensions.get('window').width + 20,
       height: 60,
       borderStyle: 'solid',
@@ -206,7 +209,7 @@ const HomeScreen = () => {
           />
         </View>
         <View style={styles.titleTextContainer}>
-          <Text style={styles.titleText}>Welcome to iMoneyClicker</Text>
+          <Text style={styles.titleText}>Welcome to iMoneyTracker</Text>
         </View>
         <View style={styles.profileBttn}>
           <TouchableOpacity>
@@ -309,7 +312,7 @@ const HomeScreen = () => {
       </View>
       <View style={styles.detailsContainer}></View>
       <View style={styles.addExpenseBtnContainer}>
-        <TouchableOpacity style={styles.addExpenseBtn}>
+        <TouchableOpacity style={styles.addExpenseBtn} onPress = {() => navigateExpensePage()}>
           <Text style={styles.addExpenseBtnText}>+</Text>
         </TouchableOpacity>
       </View>
