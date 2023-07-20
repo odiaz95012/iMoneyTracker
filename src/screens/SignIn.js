@@ -1,16 +1,17 @@
 import React from 'react';
-import {Text, Button , StyleSheet, View, Image, TextInput, TouchableOpacity, Alert} from 'react-native';
+import {Text, View, Image, TextInput, TouchableOpacity, Alert} from 'react-native';
 import { useState, useEffect } from 'react';
 import { database, auth } from '../../index';
-import { collection, doc, getDoc } from 'firebase/firestore';
+import { collection,} from 'firebase/firestore';
 import { WEB_CLIENT_ID, IOS_CLIENT_ID} from '../utils/keys';
 import {
   GoogleSigninButton,
   GoogleSignin,
   statusCodes
 } from '@react-native-google-signin/google-signin';
-import { async } from '@firebase/util';
 import { signInWithEmailAndPassword } from 'firebase/auth';
+import CookieManager from '@react-native-cookies/cookies';
+import { styles } from '../styles/SignInStyles';
 
 const SignIn = ({navigation}) =>{
 
@@ -29,17 +30,27 @@ const SignIn = ({navigation}) =>{
   function navigateHomePage(){
     navigation.navigate('homePage');
   }
+  function createUserCookie(){
+    CookieManager.set('http://financetracker-3da48.com', {
+      name: 'userEmail',
+      value: email,
+    }).then((done) => {
+      console.log('CookieManager.set =>', done);
+    });
+  }
   function signInUser(){
     signInWithEmailAndPassword(auth, email, password)
       .then((userCredential) => {
         setUser(userCredential.user)
+
         setIsLoggedIn(true);
         setError(null);
-        console.log(userCredential.user)
+        createUserCookie();
         navigateHomePage();
       })
       .catch((error) => {
         setError(error)
+        Alert.alert('There was an error signing in.')        
         console.log("Error: " + error);
       })
   }
@@ -151,65 +162,5 @@ const SignIn = ({navigation}) =>{
         
     )
 }
-const styles = StyleSheet.create({
-    mainView:{
-      flex:1,
-      flexDirection:'column',
-      justifyContent:'center',
-      alignItems:'center',
-      backgroundColor:'#5c635e'
-    },
-    logoStyle:{
-      width:200,
-      height:200,
-      borderRadius:200/2,
-      bottom:50,
-    },
-    TextInput:{
-      height: 50,
-      flex: 1,
-      padding: 10,
-      marginLeft: 20,
-      color:'#fff'
-    },
-    inputView: {
-      backgroundColor: "#31c48d",
-      borderRadius: 30,
-      width: "70%",
-      height: 45,
-      marginBottom: 20,
-      alignItems: "center",
-      paddingRight: "5%",
-      bottom:15
-    },
-    loginBtn:{
-    width:"50%",
-    borderRadius:25,
-    height:50,
-    alignItems:"center",
-    justifyContent:"center",
-    marginTop:10,
-    backgroundColor:"#31c48d"
-  
-    },
-    forgotPasswordButton:{
-      marginTop:5,
-      bottom:20,
-      
-    },
-    signUpButtonStyles:{
-      bottom:10,
-    },
-    btnTextStyle:{
-      color: "#31c48d",
-      fontSize: 18
-    },
-    logInBtnText:{
-      color:"#fff",
-      fontSize:18
-    },
-    signInWithGoogle:{
 
-    }
-  })
 export default SignIn;
