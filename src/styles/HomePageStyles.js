@@ -19,7 +19,8 @@ export const styles = StyleSheet.create({
       borderRadius: 45 / 2,
     },
     chartContainer: {
-      top: '5%',
+      top: '15%',
+      position: 'absolute',
     },
     viewSelectorContainer: {
       flexDirection: 'row',
@@ -38,7 +39,7 @@ export const styles = StyleSheet.create({
     },
     detailsContainer: {
       width: Dimensions.get('window').width - 20,
-      height: 500,
+      height: 10,
       borderRadius: 15,
       backgroundColor: '#fff',
       position: 'relative',
@@ -76,7 +77,9 @@ export const styles = StyleSheet.create({
       borderStyle: 'solid',
       borderWidth: 1,
       borderTopColor: '#5c635e',
-      borderBottomColor: 'rgba(49, 196, 141, 0.55)'
+      borderBottomColor: 'rgba(49, 196, 141, 0.55)',
+      position: 'absolute',
+      bottom: 750
     },
     titleTextContainer: {
       position: 'relative',
@@ -101,4 +104,19 @@ export const styles = StyleSheet.create({
       borderWidth: 1,
       borderColor: '#fff'
     },
+    noDataContainer: {
+      width: Dimensions.get('window').width - 50,
+      height: 300,
+      position: 'absolute',
+      backgroundColor: '#303030',
+      alignItems: 'center',
+      justifyContent: 'center',
+      top: 100,
+      fontSize: 35,
+      borderRadius: 15, 
+    },
+    noDataText: {
+      fontSize: 24,
+      color: '#fff'
+    }
   });

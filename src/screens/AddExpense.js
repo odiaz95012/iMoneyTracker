@@ -52,6 +52,7 @@ const AddExpense = ({ navigation }) => {
       const userExpenseCollectionRef = collection(database, `users/${userEmail}/expenses`);
 
       const expenseDocRef = doc(userExpenseCollectionRef);
+      
       const options = { month: 'long', day: 'numeric', year: 'numeric' };
       const formattedDate = date.toLocaleDateString('en-US', options);
       setDoc(expenseDocRef, {
