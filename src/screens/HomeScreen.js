@@ -17,6 +17,8 @@ import { query, collection, where, getDocs } from 'firebase/firestore';
 import { useIsFocused } from '@react-navigation/native';
 import CookieManager from '@react-native-cookies/cookies';
 import { styles } from '../styles/HomePageStyles';
+import ExpenseList from '../components/ExpenseList';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 //TODO: 
 //#1: Add a feature that dynamically adds a sumamry of each expense made corresponding to the selected chart
@@ -31,7 +33,8 @@ const HomeScreen = ({ navigation }) => {
         data: [],
         strokeWidth: 2,
       }
-    ]
+    ],
+    expenseObjs: []
   });
   const [weeklyChart, setWeeklyChart] = useState({
     labels: [],
@@ -40,7 +43,8 @@ const HomeScreen = ({ navigation }) => {
         data: [],
         strokeWidth: 2,
       }
-    ]
+    ],
+    expenseObjs: []
   });
   const [monthlyChart, setMonthlyChart] = useState({
     labels: [],
@@ -49,7 +53,8 @@ const HomeScreen = ({ navigation }) => {
         data: [],
         strokeWidth: 2,
       }
-    ]
+    ],
+    expenseObjs: []
   });
   const [dataLoaded, setDataLoaded] = useState(false);
 
@@ -77,6 +82,7 @@ const HomeScreen = ({ navigation }) => {
         strokeWidth: 2
       }
     ],
+    expenseObjs: []
   });
   const [dailyBtnColor, setDailyBtnColor] = useState('#257AFD');
   const [weeklyBtnColor, setWeeklyBtnColor] = useState('#31c48d');
@@ -280,6 +286,8 @@ const HomeScreen = ({ navigation }) => {
     // Combine the components into the desired format 'MM/DD/YY'
     return `${month}/${day}/${year}`;
   }
+
+
   const isFocused = useIsFocused();
 
   useEffect(() => {
@@ -304,6 +312,7 @@ const HomeScreen = ({ navigation }) => {
               strokeWidth: 2,
             },
           ],
+          expenseObjs: dailyExpensesData.objs
         });
         setWeeklyChart({
           labels: Array.from(weeklyExpensesData.labels),
@@ -313,6 +322,7 @@ const HomeScreen = ({ navigation }) => {
               strokeWidth: 2,
             },
           ],
+          expenseObjs: weeklyExpensesData.objs
         });
         setMonthlyChart({
           labels: Array.from(monthlyExpensesData.labels),
@@ -322,11 +332,18 @@ const HomeScreen = ({ navigation }) => {
               strokeWidth: 2,
             },
           ],
+          expenseObjs: monthlyExpensesData.objs
         });
         // Set the selected chart to the daily chart initially
         setSelectedChart({
           labels: Array.from(dailyExpensesData.labels),
-          datasets: [{ data: dailyExpensesData.amounts, strokeWidth: 2 }],
+          datasets: [
+            {
+              data: dailyExpensesData.amounts,
+              strokeWidth: 2
+            }
+          ],
+          expenseObjs: dailyExpensesData.objs
         });
 
         setDataLoaded(true);
@@ -339,143 +356,148 @@ const HomeScreen = ({ navigation }) => {
   }, [isFocused]);
 
 
+
   return (
-    <ScrollView contentContainerStyle={styles.mainView}>
-      <View style={styles.titleContainer}>
-        <View style={styles.logoContainer}>
-          <Image
-            source={require('../assets/logo.png')}
-            style={styles.logoStyle}
-          />
+    <SafeAreaView style={styles.container}>
+      <View style={styles.mainView}>
+        <View style={styles.titleContainer}>
+          <View style={styles.logoContainer}>
+            <Image
+              source={require('../assets/logo.png')}
+              style={styles.logoStyle}
+            />
+          </View>
+          <View style={styles.titleTextContainer}>
+            <Text style={styles.titleText}>Welcome to iMoneyTracker</Text>
+          </View>
+          <View style={styles.profileBttn}>
+            <TouchableOpacity>
+              <FontAwesomeIcon icon={faUser} style={{ color: '#fff' }} />
+            </TouchableOpacity>
+          </View>
         </View>
-        <View style={styles.titleTextContainer}>
-          <Text style={styles.titleText}>Welcome to iMoneyTracker</Text>
+        {dataLoaded ?
+          (
+            <View style={styles.chartContainer}>
+              {dataLoaded && selectedChart.datasets[0].data.length > 0 ?
+                (
+                  <LineChart
+                    data={selectedChart}
+                    width={Dimensions.get('window').width - 10}
+                    height={250}
+                    yAxisLabel={'$'}
+                    withInnerLines={0}
+                    withOuterLines={0}
+                    chartConfig={chartConfig}
+                    bezier
+                    style={{
+                      borderRadius: 25,
+
+                    }}
+                    decorator={() => {
+                      return tooltipPos.visible ? (
+                        <View>
+                          <Svg>
+                            <Rect
+                              x={tooltipPos.x - 15}
+                              y={tooltipPos.y + 10}
+                              width="40"
+                              height="30"
+                              fill="#373737"
+                            />
+                            <TextSVG
+                              x={tooltipPos.x + 5}
+                              y={tooltipPos.y + 30}
+                              fill="white"
+                              fontSize="14"
+                              fontWeight="bold"
+                              textAnchor="middle">
+                              {'$' + tooltipPos.value}
+                            </TextSVG>
+                          </Svg>
+                        </View>
+                      ) : null;
+                    }}
+                    onDataPointClick={data => {
+                      let isSamePoint =
+                        tooltipPos.x === data.x && tooltipPos.y === data.y;
+
+                      isSamePoint
+                        ? setTooltipPos(previousState => {
+                          return {
+                            ...previousState,
+                            value: data.value,
+                            visible: !previousState.visible,
+                          };
+                        })
+                        : setTooltipPos({
+                          x: data.x,
+                          value: data.value,
+                          y: data.y,
+                          visible: true,
+                        });
+                    }}
+                  />
+
+                ) : (
+                  <View style={styles.noDataContainer}>
+                    <Text style={styles.noDataText}>No Expenses to Display</Text>
+                  </View>
+                )}
+            </View>
+          ) : (
+            //Show loading indicator while data is being fetched
+            <ActivityIndicator size="large" color="#fff" style={{ bottom: 150 }} />
+          )}
+        <View style={styles.viewSelectorContainer}>
+          <View style={styles.viewSelectorBtnContainer}>
+            <TouchableOpacity onPress={() => handleChartChange(dailyChart)}>
+              <Text
+                style={{
+                  color: dailyBtnColor,
+                  fontFamily: 'ArialRoundedMTBold',
+                }}>
+                Daily
+              </Text>
+            </TouchableOpacity>
+          </View>
+          <View style={styles.viewSelectorBtnContainer}>
+            <TouchableOpacity onPress={() => handleChartChange(weeklyChart)}>
+              <Text
+                style={{
+                  color: weeklyBtnColor,
+                  fontFamily: 'ArialRoundedMTBold',
+                }}>
+                Weekly
+              </Text>
+            </TouchableOpacity>
+          </View>
+          <View style={styles.viewSelectorBtnContainer}>
+            <TouchableOpacity onPress={() => handleChartChange(monthlyChart)}>
+              <Text
+                style={{
+                  color: monthlyBtnColor,
+                  fontFamily: 'ArialRoundedMTBold',
+                }}>
+                Monthly
+              </Text>
+            </TouchableOpacity>
+          </View>
         </View>
-        <View style={styles.profileBttn}>
-          <TouchableOpacity>
-            <FontAwesomeIcon icon={faUser} style={{ color: '#fff' }} />
+        {selectedChart.datasets[0].data.length > 0 ?
+          (
+            <ScrollView style={styles.detailsContainer}>
+              <ExpenseList expenses={selectedChart.expenseObjs} />
+            </ScrollView>
+          ) : null
+        }
+        <View style={styles.addExpenseBtnContainer}>
+          <TouchableOpacity style={styles.addExpenseBtn} onPress={() => navigateExpensePage()}>
+            <Text style={styles.addExpenseBtnText}>+</Text>
           </TouchableOpacity>
         </View>
       </View>
-      {dataLoaded ?
-        (
-          <View style={styles.chartContainer}>
-            {dataLoaded && selectedChart.datasets[0].data.length > 0 ?
-              (
-                <LineChart
-                  data={selectedChart}
-                  width={Dimensions.get('window').width - 10}
-                  height={220}
-                  yAxisLabel={'$'}
-                  withInnerLines={0}
-                  withOuterLines={0}
-                  chartConfig={chartConfig}
-                  bezier
-                  style={{
-                    borderRadius: 25,
-
-                  }}
-                  decorator={() => {
-                    return tooltipPos.visible ? (
-                      <View>
-                        <Svg>
-                          <Rect
-                            x={tooltipPos.x - 15}
-                            y={tooltipPos.y + 10}
-                            width="40"
-                            height="30"
-                            fill="#373737"
-                          />
-                          <TextSVG
-                            x={tooltipPos.x + 5}
-                            y={tooltipPos.y + 30}
-                            fill="white"
-                            fontSize="14"
-                            fontWeight="bold"
-                            textAnchor="middle">
-                            {'$' + tooltipPos.value}
-                          </TextSVG>
-                        </Svg>
-                      </View>
-                    ) : null;
-                  }}
-                  onDataPointClick={data => {
-                    let isSamePoint =
-                      tooltipPos.x === data.x && tooltipPos.y === data.y;
-
-                    isSamePoint
-                      ? setTooltipPos(previousState => {
-                        return {
-                          ...previousState,
-                          value: data.value,
-                          visible: !previousState.visible,
-                        };
-                      })
-                      : setTooltipPos({
-                        x: data.x,
-                        value: data.value,
-                        y: data.y,
-                        visible: true,
-                      });
-                  }}
-                />
-
-              ) : (
-                <View style={styles.noDataContainer}>
-                  <Text style={styles.noDataText}>No Expenses to Display</Text>
-                </View>
-              )}
-            {selectedChart.datasets[0].data.length > 0 ?
-              (
-                <View style={styles.viewSelectorContainer}>
-                  <View style={styles.viewSelectorBtnContainer}>
-                    <TouchableOpacity onPress={() => handleChartChange(dailyChart)}>
-                      <Text
-                        style={{
-                          color: dailyBtnColor,
-                          fontFamily: 'ArialRoundedMTBold',
-                        }}>
-                        Daily
-                      </Text>
-                    </TouchableOpacity>
-                  </View>
-                  <View style={styles.viewSelectorBtnContainer}>
-                    <TouchableOpacity onPress={() => handleChartChange(weeklyChart)}>
-                      <Text
-                        style={{
-                          color: weeklyBtnColor,
-                          fontFamily: 'ArialRoundedMTBold',
-                        }}>
-                        Weekly
-                      </Text>
-                    </TouchableOpacity>
-                  </View>
-                  <View style={styles.viewSelectorBtnContainer}>
-                    <TouchableOpacity onPress={() => handleChartChange(monthlyChart)}>
-                      <Text
-                        style={{
-                          color: monthlyBtnColor,
-                          fontFamily: 'ArialRoundedMTBold',
-                        }}>
-                        Monthly
-                      </Text>
-                    </TouchableOpacity>
-                  </View>
-                </View>
-              ) : null
-            }
-          </View>
-        ) : (
-          //Show loading indicator while data is being fetched
-          <ActivityIndicator size="large" color="#fff" />
-        )}
-      <View style={styles.detailsContainer}></View>
-      <View style={styles.addExpenseBtnContainer}>
-        <TouchableOpacity style={styles.addExpenseBtn} onPress={() => navigateExpensePage()}>
-          <Text style={styles.addExpenseBtnText}>+</Text>
-        </TouchableOpacity>
-      </View>
-    </ScrollView>
+    </SafeAreaView>
   );
 };
 
