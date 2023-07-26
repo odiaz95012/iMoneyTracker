@@ -82,7 +82,8 @@ const HomeScreen = ({ navigation }) => {
         strokeWidth: 2
       }
     ],
-    expenseObjs: []
+    expenseObjs: [],
+    expensesTotal: null
   });
   const [dailyBtnColor, setDailyBtnColor] = useState('#257AFD');
   const [weeklyBtnColor, setWeeklyBtnColor] = useState('#31c48d');
@@ -196,6 +197,7 @@ const HomeScreen = ({ navigation }) => {
       objs: [],
       amounts: [],
       labels: new Set(),
+      expensesTotal: null
     };
 
     dailyQuerySnapshot.forEach((expense) => {
@@ -203,7 +205,7 @@ const HomeScreen = ({ navigation }) => {
       dailyExpensesData.amounts.push(expense.data().expenseAmount);
       dailyExpensesData.labels.add(convertTo12Hour(expense.data().expenseTime));
     });
-
+    dailyExpensesData.expensesTotal = dailyExpensesData.amounts.reduce((a, b) => a + b, 0)
     return dailyExpensesData;
   }
 
@@ -213,17 +215,20 @@ const HomeScreen = ({ navigation }) => {
     const weeklyQuery = query(userExpensesCollecRef, where("expenseDate", "in", currentWeekRange));
     const weeklyExpensesSnapshot = await getDocs(weeklyQuery);
 
-    const weeklyExpenseData = {
+    const weeklyExpensesData = {
       objs: [],
       amounts: [],
       labels: new Set(),
+      expensesTotal: null
     };
     weeklyExpensesSnapshot.forEach((expense) => {
-      weeklyExpenseData.objs.push(expense.data());
-      weeklyExpenseData.amounts.push(expense.data().expenseAmount);
-      weeklyExpenseData.labels.add(formatDate(expense.data().expenseDate));
+      weeklyExpensesData.objs.push(expense.data());
+      weeklyExpensesData.amounts.push(expense.data().expenseAmount);
+      weeklyExpensesData.labels.add(formatDate(expense.data().expenseDate));
     });
-    return weeklyExpenseData;
+    weeklyExpensesData.expensesTotal = weeklyExpensesData.amounts.reduce((a, b) => a + b, 0)
+
+    return weeklyExpensesData;
   }
 
   async function getMonthlyExpenses(userExpensesCollecRef) {
@@ -237,6 +242,7 @@ const HomeScreen = ({ navigation }) => {
       objs: [],
       amounts: [],
       labels: new Set(),
+      expensesTotal: null
     }
     monthlyExpensesSnapshot.forEach((expense) => {
       monthlyExpensesData.objs.push(expense.data());
@@ -244,6 +250,7 @@ const HomeScreen = ({ navigation }) => {
       // TODO: Change this to store the weeks instead of exact dates
       monthlyExpensesData.labels.add(formatDate(expense.data().expenseDate));
     });
+    monthlyExpensesData.expensesTotal = monthlyExpensesData.amounts.reduce((a, b) => a + b, 0)
 
     return monthlyExpensesData;
   }
@@ -312,7 +319,8 @@ const HomeScreen = ({ navigation }) => {
               strokeWidth: 2,
             },
           ],
-          expenseObjs: dailyExpensesData.objs
+          expenseObjs: dailyExpensesData.objs,
+          expensesTotal: dailyExpensesData.expensesTotal
         });
         setWeeklyChart({
           labels: Array.from(weeklyExpensesData.labels),
@@ -322,7 +330,8 @@ const HomeScreen = ({ navigation }) => {
               strokeWidth: 2,
             },
           ],
-          expenseObjs: weeklyExpensesData.objs
+          expenseObjs: weeklyExpensesData.objs,
+          expensesTotal: weeklyExpensesData.expensesTotal
         });
         setMonthlyChart({
           labels: Array.from(monthlyExpensesData.labels),
@@ -332,7 +341,8 @@ const HomeScreen = ({ navigation }) => {
               strokeWidth: 2,
             },
           ],
-          expenseObjs: monthlyExpensesData.objs
+          expenseObjs: monthlyExpensesData.objs,
+          expensesTotal: monthlyExpensesData.expensesTotal
         });
         // Set the selected chart to the daily chart initially
         setSelectedChart({
@@ -343,7 +353,8 @@ const HomeScreen = ({ navigation }) => {
               strokeWidth: 2
             }
           ],
-          expenseObjs: dailyExpensesData.objs
+          expenseObjs: dailyExpensesData.objs,
+          expensesTotal: dailyExpensesData.expensesTotal
         });
 
         setDataLoaded(true);
@@ -449,6 +460,17 @@ const HomeScreen = ({ navigation }) => {
             //Show loading indicator while data is being fetched
             <ActivityIndicator size="large" color="#fff" style={{ bottom: 150 }} />
           )}
+        {dataLoaded && selectedChart.expensesTotal !== null ? (
+          <View style={styles.expenseTotalContainer}>
+            <Text style={styles.totalText}>
+              You have spent a total of ${selectedChart.expensesTotal}
+            </Text>
+          </View>
+        ) : (
+          <View style={styles.expenseTotalContainer}>
+            <Text style={styles.totalText}>Loading...</Text>
+          </View>
+        )}
         <View style={styles.viewSelectorContainer}>
           <View style={styles.viewSelectorBtnContainer}>
             <TouchableOpacity onPress={() => handleChartChange(dailyChart)}>
@@ -484,9 +506,9 @@ const HomeScreen = ({ navigation }) => {
             </TouchableOpacity>
           </View>
         </View>
-        {selectedChart.datasets[0].data.length > 0 ?
+        {dataLoaded && selectedChart.datasets[0].data.length > 0 ?
           (
-            <ScrollView style={styles.detailsContainer}>
+            <ScrollView style={styles.detailsContainer} contentContainerStyle={{ paddingTop:10, paddingBottom: 500 }}>
               <ExpenseList expenses={selectedChart.expenseObjs} />
             </ScrollView>
           ) : null

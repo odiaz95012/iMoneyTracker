@@ -1,31 +1,29 @@
 import React from 'react';
 import { View, Text, StyleSheet, ScrollView } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
 
 const ExpenseList = ({ expenses }) => {
-    if(!expenses || !Array.isArray(expenses)){
-        return <Text>No Expenses To Display</Text>;
+  if (!expenses || !Array.isArray(expenses)) {
+    return <Text>No Expenses To Display</Text>;
+  }
+  const styles = StyleSheet.create({
+    container: {
+      borderColor: '#31c48d',
+      borderRadius: 15,
+      marginBottom: 15,
+      paddingTop: 10,
+      paddingBottom: 10,
+      paddingLeft: 10,
+      borderStyle: 'solid',
+      borderWidth: 0.5,
+    },
+    text: {
+      color: '#31c48d',
+      fontFamily: 'ArialRoundedMTBold',
+      fontSize: 16,
+      paddingVertical: 10
     }
-    const styles = StyleSheet.create({
-        container: {
-            justifyContent: 'space-evenly',
-            alignItems: 'flex-start',
-            paddingVertical: 10,
-            borderColor: '#fff',
-            borderRadius: 15,
-            marginBottom: 10,
-            paddingLeft: 10,
-            borderStyle: 'solid',
-            borderWidth: 0.5
-        },
-        text: {
-            color: '#fff',
-            fontFamily: 'ArialRoundedMTBold',
-            fontSize: 16,
-            paddingVertical: 10
-        }
-    })
-      //this function formats a 24 hour time (e.g., 13:35) to 12 hour time (e.g., 1:35 PM)
+  })
+  //this function formats a 24 hour time (e.g., 13:35) to 12 hour time (e.g., 1:35 PM)
   function convertTo12Hour(time) {
     // Extract the hour and minute components from the time string
     const [hour, minute] = time.split(':');

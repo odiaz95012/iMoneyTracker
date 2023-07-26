@@ -10,7 +10,7 @@ export const styles = StyleSheet.create({
       justifyContent: 'center',
       alignItems: 'center',
       height: '100%',
-      overflow: 'scroll'
+      overflow: 'hidden',
     },
     logoContainer: {
       position: 'relative',
@@ -33,7 +33,7 @@ export const styles = StyleSheet.create({
       justifyContent: 'center',
       borderRadius: 25,
       backgroundColor: '#373737',
-      top: 370,
+      top: 420,
       right: 40,
       position: 'absolute',
     },
@@ -45,10 +45,9 @@ export const styles = StyleSheet.create({
       flex: 1,
       borderRadius: 25,
       backgroundColor: '#fff',
-      height: '100%',
-      top: 450,
+      top: 470,
       backgroundColor: '#303030',
-      padding: 10
+      padding: 10,
     },
     addExpenseBtnContainer: {
       width: 75,
@@ -58,7 +57,6 @@ export const styles = StyleSheet.create({
       alignItems: 'center',
       justifyContent: 'center',
       right: 15,
-      zIndex: 2,
       bottom: 5,
       position: 'absolute',
     },
@@ -125,5 +123,24 @@ export const styles = StyleSheet.create({
       fontSize: 24,
       color: '#fff',
       fontFamily: 'ArialRoundedMTBold'
+    },
+    expenseTotalContainer: {
+      width: Dimensions.get('window').width - 10,
+      height: 40,
+      backgroundColor: '#373737',
+      justifyContent: 'center',
+      alignItems: 'center',
+      position: 'absolute',
+      top: 365,
+      borderRadius: 25
+    },
+    totalText: {
+      color: '#31c48d',
+      position: 'relative',
+
+      paddingLeft: 15,
+      fontFamily: 'ArialRoundedMTBold',
+      fontSize: 16
+      
     }
   });
